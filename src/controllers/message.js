@@ -40,18 +40,30 @@ exports.sendMessage = async (req, res) => {
     const { content } = req.body;
     const { id: receiver } = req.params;
     const sender = req.user._id;
-    const imgs = req.files ? req.files.map(file => file.filename) : [];
-    if (!content && imgs.length === 0) {
-      return res.status(400).json({ msg: 'Message content or image is required' });
+    let type = 'text';
+    let fileUrls = [];
+    let msgContent = content || '';
+    if (req.files && req.files.length > 0) {
+      fileUrls = req.files.map(file => `http://${req.get("host")}/Uploads/${file.filename}`);
+      const exts = req.files.map(file => file.originalname.split('.').pop().toLowerCase());
+      const allImages = exts.every(ext => ["jpg","jpeg","png","gif","avif"].includes(ext));
+      const allVideos = exts.every(ext => ["mp4"].includes(ext));
+      if (allImages) type = 'image';
+      else if (allVideos) type = 'video';
+      else type = 'mixed';
+      msgContent = '';
+    }
+    if (!msgContent && fileUrls.length === 0) {
+      return res.status(400).json({ msg: 'Message content or image/video is required' });
     }
     const newMessage = new Message({
       sender,
       receiver,
-      content: content || '',
-      // You can add image support to the schema if needed
+      content: msgContent,
+      type,
+      fileUrls,
     });
     await newMessage.save();
-    
     // Emit socket event for real-time notification
     const io = req.app.get('io');
     if (io) {
@@ -61,7 +73,6 @@ exports.sendMessage = async (req, res) => {
         receiverId: receiver
       });
     }
-    
     res.status(201).json(newMessage);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

@@ -19,7 +19,7 @@ app.use(cors())
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(express.static("public/Uploads"))
+app.use('/Uploads', express.static(__dirname + '/public/Uploads'));
 
 dbConnection();
 

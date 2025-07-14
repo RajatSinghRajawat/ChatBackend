@@ -129,4 +129,21 @@ const getUserById = tryCatch(async (req, res) => {
     res.status(200).json({ success: true, user });
 });
 
-module.exports = { register, login, logOut, updateUser, getProfile, getAllUsers, getUserById };
+// Search users by name, username, or email (case-insensitive, partial match)
+const searchUsers = tryCatch(async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.trim() === '') {
+        return res.status(400).json({ msg: 'Search query is required' });
+    }
+    const regex = new RegExp(q, 'i');
+    const users = await User.find({
+        $or: [
+            { name: regex },
+            { username: regex },
+            { email: regex }
+        ]
+    }).select('name username email avatar');
+    res.status(200).json(users);
+});
+
+module.exports = { register, login, logOut, updateUser, getProfile, getAllUsers, getUserById, searchUsers };

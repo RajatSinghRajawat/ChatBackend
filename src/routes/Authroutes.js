@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login, logOut, updateUser, getProfile, getAllUsers, getUserById } = require('../controllers/authentication');
+const { register, login, logOut, updateUser, getProfile, getAllUsers, getUserById, searchUsers } = require('../controllers/authentication');
 const upload = require('../../multer');
 const verifyUser = require('../middleware/userAuthenticate');
 const router = express.Router();
@@ -34,5 +34,6 @@ router.get('/profile', verifyUser, getProfile);
 router.get('/users', verifyUser, getAllUsers);
 
 router.get('/user/:id', verifyUser, getUserById);
+router.get('/search', verifyUser, searchUsers);
 
 module.exports = router;
