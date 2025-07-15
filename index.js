@@ -5,7 +5,7 @@ const { Server } = require('socket.io');
 const dbConnection = require('./src/config/db');
 const authRoutes = require('./src/routes/Authroutes');
 const messageRoutes = require('./src/routes/messageRoutes');
-
+const groupRoutes = require('./src/routes/groupRoutes');
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
   socket.on('new_message', (data) => {
     const { receiverId, message } = data;
     const receiverSocketId = connectedUsers.get(receiverId);
-    
+
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('message_received', {
         message,
@@ -67,6 +67,7 @@ app.set('io', io);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/groups', groupRoutes);
 
 server.listen(port, () => {
   console.log(`Server running on port = ${port}`);

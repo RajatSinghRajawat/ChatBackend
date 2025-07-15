@@ -6,6 +6,7 @@ const messageSchema = new mongoose.Schema({
   content: { type: String }, // not always required
   type: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
   fileUrls: [{ type: String }], // array of file URLs
+  group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group', default: null },
   timestamp: { type: Date, default: Date.now },
   read: { type: Boolean, default: false }
 });
